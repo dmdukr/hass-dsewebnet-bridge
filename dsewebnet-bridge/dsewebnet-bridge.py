@@ -80,7 +80,7 @@ SUBSCRIPTION = {
 }
 
 # Control command IDs
-CMD = {"stop": 35700, "manual": 35702, "start": 35705, "auto": 35709}
+CMD = {"stop": 35700, "auto": 35701, "manual": 35702, "start": 35705}
 
 # param 130 sub-key → state field name
 STATUS_FIELDS = {"0": "engine_state", "1": "mains_state",
