@@ -324,6 +324,8 @@ async def ws_loop():
 async def main():
     global _loop
     _loop = asyncio.get_running_loop()
+    # Push previous session logs off screen
+    print("\n" * 80, end="", flush=True)
     mqtt_setup()
     await asyncio.sleep(1)
     try:
