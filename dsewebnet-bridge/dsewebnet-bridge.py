@@ -124,7 +124,7 @@ def mqtt_setup():
     mqttc.loop_start()
 
 def _on_connect(client, userdata, flags, rc):
-    log.info(f"MQTT connected rc={rc}")
+    log.info("MQTT connected")
     client.subscribe(f"{MQTT_PREFIX}/command")
     client.publish(f"{MQTT_PREFIX}/availability", "online", retain=True)
     _publish_discovery(client)
@@ -132,10 +132,8 @@ def _on_connect(client, userdata, flags, rc):
 def _on_message(client, userdata, msg):
     cmd = msg.payload.decode().strip().lower()
     if cmd in CMD:
-        # paho runs in its own thread — use call_soon_threadsafe to safely
-        # hand the command off to the asyncio event loop
         _loop.call_soon_threadsafe(pending_cmd.put_nowait, cmd)
-        log.info(f"Command received: {cmd}")
+        log.info(f"Command queued: {cmd}")
     else:
         log.warning(f"Unknown command: {cmd}")
 
@@ -195,7 +193,7 @@ def _publish_discovery(client):
         client.publish(f"{HASS_PREFIX}/button/dse_{MODULE_ID}/{cmd_name}/config",
                        json.dumps(cfg), retain=True)
 
-    log.info("HASS discovery configs published")
+    log.info("HASS discovery published")
 
 # ── Message parsing ───────────────────────────────────────────────────────
 def _handle_ws_message(raw: str):
@@ -243,10 +241,9 @@ def _handle_ws_message(raw: str):
                  f"oil={state['oil_pressure']}bar L1={state['voltage_l1n']}V freq={state['frequency']}Hz")
 
 # ── WebSocket loop ────────────────────────────────────────────────────────
-async def _send(ws, cmd_id: int):
-    msg = json.dumps({"3": {GATEWAY_ID: {"modules": {MODULE_ID: [cmd_id]}}}})
-    await ws.send_str(msg)
-    log.info(f"Sent cmd_id={cmd_id}")
+async def _send(ws, cmd_id: int, label: str = ""):
+    await ws.send_str(json.dumps({"3": {GATEWAY_ID: {"modules": {MODULE_ID: [cmd_id]}}}}))
+    log.info(f"→ {label or cmd_id}")
 
 async def _login(session: aiohttp.ClientSession) -> bool:
     try:
@@ -283,22 +280,19 @@ async def ws_loop():
                     print("\033[36m" + "─" * 60 + "\033[0m")
                     log.info("\033[36m▶ NEW SESSION — WebSocket connected\033[0m")
                     await ws.send_str(json.dumps(SUBSCRIPTION))
-                    log.info("Subscription sent")
 
                     async def _poller():
                         while True:
                             await asyncio.sleep(POLL_INTERVAL)
-                            # Re-send subscription to refresh data
                             await ws.send_str(json.dumps(SUBSCRIPTION))
-                            log.debug("Poll: subscription re-sent")
 
                     async def _cmd_sender():
                         while True:
                             cmd = await pending_cmd.get()
                             if cmd == "start":
-                                await _send(ws, CMD["manual"])
+                                await _send(ws, CMD["manual"], "manual (pre-start)")
                                 await asyncio.sleep(1)
-                            await _send(ws, CMD[cmd])
+                            await _send(ws, CMD[cmd], cmd)
 
                     poll_task = asyncio.create_task(_poller())
                     cmd_task  = asyncio.create_task(_cmd_sender())

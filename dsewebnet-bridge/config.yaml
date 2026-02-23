@@ -1,6 +1,6 @@
 name: "DSEWebNet Bridge"
 description: "DSEWebNet → MQTT Bridge for Home Assistant. Connects to DSEWebNet cloud and publishes DSE generator data via MQTT auto-discovery."
-version: "1.0.0"
+version: "1.0.1"
 slug: "dsewebnet_bridge"
 url: "https://github.com/dmdukr/hass-dsewebnet-bridge"
 init: false

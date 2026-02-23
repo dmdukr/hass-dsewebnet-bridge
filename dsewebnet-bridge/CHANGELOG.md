@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1
+- Fixed Auto command ID (35701, verified from browser traffic)
+- Start button now sends Manual → Start sequence automatically
+- Fixed command thread-safety (paho callback → asyncio queue)
+- Cleaned up logs: status updates, commands, connection events only
+- Logs cleared on each restart
+
 ## 1.0.0
 
 Initial release.
