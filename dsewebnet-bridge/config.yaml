@@ -1,0 +1,31 @@
+name: "DSEWebNet Bridge"
+description: "DSEWebNet → MQTT Bridge for Home Assistant. Connects to DSEWebNet cloud and publishes DSE generator data via MQTT auto-discovery."
+version: "1.0.0"
+slug: "dsewebnet_bridge"
+url: "https://github.com/dmdukr/hass-dsewebnet-bridge"
+init: false
+arch:
+  - amd64
+  - aarch64
+  - armhf
+  - armv7
+options:
+  dse_username: ""
+  dse_password: ""
+  gateway_id: "19128A7F6315501"
+  module_id: "6729830DF6"
+  mqtt_host: "core-mosquitto"
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_pass: ""
+  poll_interval: 30
+schema:
+  dse_username: str
+  dse_password: str
+  gateway_id: str
+  module_id: str
+  mqtt_host: str
+  mqtt_port: int
+  mqtt_user: str
+  mqtt_pass: str
+  poll_interval: int
